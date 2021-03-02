@@ -1,0 +1,33 @@
+@import "./input.scss";
+
+body {
+	margin: 0;
+	font-family: Roboto, sans-serif;
+}
+
+a {
+	text-decoration: none;
+	color: inherit;
+}
+
+input, select, button {
+	border: none;
+	outline: none;
+}
+
+h1, h2, h3, h4, h5, h6 {
+	font-weight: normal;
+	margin: 0;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+.align-right {
+	margin-left: auto;
+}
+
+.red {
+	color: #FF0000;
+}
