@@ -29,7 +29,6 @@ export default {
     }),
     hrefs() {
       const result = []
-      console.log(this.favorites)
       this.favorites.forEach(item => {
         result.push({
           name: 'search',

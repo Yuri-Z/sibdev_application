@@ -40,7 +40,6 @@ export default new Vuex.Store({
   actions: {
     authorize({commit}, user) {
       commit('setUser', user)
-      console.log('get fav from LS', Array.from(JSON.parse(localStorage.getItem('favorites'))[user.login]))
       commit('modifyFavorites', [Array.from(JSON.parse(localStorage.getItem('favorites'))[user.login])])
     },
     setFavorites({state: {user: {login}, favorites}, commit}, [payload, index]) {
