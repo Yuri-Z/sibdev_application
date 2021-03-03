@@ -19,30 +19,28 @@ export default new Vuex.Store({
     },
     deleteFromFavorites(state, index) {
       state.favorites.splice(index, 1)
-      // setFavorites(state.favorites)
-    },
-    addToFavorites(state, { request, index }) {
-      if (typeof index === 'number') {
-        state.favorites.splice(index, 1, request)
-      } else {
-        state.favorites.push(request)
-      }
-      // setFavorites(state.favorites)
     },
     modifyFavorites(state, [payload, index]) {
-      if (Array.isArray(payload))
-        return state.favorites = payload
-      if (typeof index === 'number') {
-        if (payload) state.favorites.splice(index, 1, payload)
-        else state.favorites.splice(index, 1)
-      } else {
-        return state.favorites.push(payload)
+      let action
+      if (Array.isArray(payload)) action = 'set'
+      else if (typeof index === 'number') {
+        if (payload) action = 'edit'
+        else action = 'delete'
+      } else if (payload) action = 'add'
+
+      switch (action) {
+        case 'set': return state.favorites = payload
+        case 'add': return state.favorites.push(payload)
+        case 'edit': return state.favorites.splice(index, 1, payload)
+        case 'delete': return state.favorites.splice(index, 1)
+        default: console.log('modifyFavorites error')
       }
     }
   },
   actions: {
     authorize({commit}, user) {
       commit('setUser', user)
+      console.log('get fav from LS', Array.from(JSON.parse(localStorage.getItem('favorites'))[user.login]))
       commit('modifyFavorites', [Array.from(JSON.parse(localStorage.getItem('favorites'))[user.login])])
     },
     setFavorites({state: {user: {login}, favorites}, commit}, [payload, index]) {

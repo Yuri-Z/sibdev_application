@@ -5,8 +5,8 @@ import store from './store'
 import axios from 'axios'
 import VueAxios from 'vue-axios'
 
-import './assets/fonts/index.scss'
-import './assets/styles/_globalStyles/_globalStyles.scss'
+import '/src/assets/fonts/index.scss'
+import '/src/assets/styles/_globalStyles/_globalStyles.scss'
 
 Vue.config.productionTip = false
 

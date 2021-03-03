@@ -29,12 +29,13 @@ export default {
     }),
     hrefs() {
       const result = []
+      console.log(this.favorites)
       this.favorites.forEach(item => {
         result.push({
           name: 'search',
           params: { id: this.login, search: item.text },
           query: {
-            req: item.text,
+            q: item.text,
             maxResults: item.maxResults !== 12 ? item.maxResults : undefined,
             order: item.order && item.order !== 'nothing' ? item.order : undefined,
           },
@@ -57,66 +58,65 @@ export default {
 
 <style lang="scss">
 .favorites {
-
-}
-.favorites__header {
-  margin: 40px 0;
-  font-size: 28px;
-  line-height: 40px;
-}
-.favorites__list {}
-.favorites__item {
-  display: flex;
-  align-items: center;
-  height: 47px;
-  padding: 0 20px;
-  font-size: 16px;
-  line-height: 20px;
-  cursor: pointer;
-  background-color: #fff;
-  border-bottom: 1px solid #F1F1F1;
-  transition: background-color 200ms;
-
-  &:hover {
-    background-color: #E5E5E5;
-
-    .favorites__item-panel {
-      opacity: 1;
+  &__header {
+    margin: 40px 0;
+    font-size: 28px;
+    line-height: 40px;
+  }
+  &__list {}
+  &__item {
+    display: flex;
+    align-items: center;
+    height: 47px;
+    padding: 0 20px;
+    font-size: 16px;
+    line-height: 20px;
+    cursor: pointer;
+    background-color: #fff;
+    border-bottom: 1px solid #F1F1F1;
+    transition: background-color 200ms;
+  
+    &:hover {
+      background-color: #E5E5E5;
+    
+      .favorites__item-panel {
+        opacity: 1;
+      }
     }
   }
-}
-.favorites__item-title {
-  display: flex;
-  align-items: center;
-  height: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  flex-grow: 1;
-}
-.favorites__item-panel {
-  display: flex;
-  height: 100%;
-  font-size: 14px;
-
-  line-height: 20px;
-  opacity: 0;
-  transition: opacity 100ms;
-
-  & > * + * {
-    margin-left: 30px;
+  &__item-title {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex-grow: 1;
   }
-}
-.favorites__item-button {
-  display: flex;
-  align-items: center;
-  height: 100%;
-
-  &_change {
-    color: #1390E5;
+  &__item-panel {
+    display: flex;
+    height: 100%;
+    font-size: 14px;
+  
+    line-height: 20px;
+    opacity: 0;
+    transition: opacity 100ms;
+  
+    & > * + * {
+      margin-left: 30px;
+    }
   }
-  &_delete {
-    color: #FF0000;
+  &__item-button {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    
+    &_change {
+      color: #1390E5;
+    }
+    &_delete {
+      color: #FF0000;
+    }
   }
 }
 </style>

@@ -10,7 +10,10 @@
         v-model="textModel"
         @keydown.enter="runSearch()"
       >
-      <i class="search__field-icon icon-heart" @click="addToFavorites()" v-if="requestText"></i>
+      <svg class="search__field-icon" width="24" height="22" viewBox="0 0 24 22" fill="none" xmlns="http://www.w3.org/2000/svg" @click="addToFavorites('edit')" v-if="repeatedQuery">
+        <path d="M20.8401 3.60999C20.3294 3.099 19.7229 2.69364 19.0555 2.41708C18.388 2.14052 17.6726 1.99817 16.9501 1.99817C16.2276 1.99817 15.5122 2.14052 14.8448 2.41708C14.1773 2.69364 13.5709 3.099 13.0601 3.60999L12.0001 4.66999L10.9401 3.60999C9.90843 2.5783 8.50915 1.9987 7.05012 1.9987C5.59109 1.9987 4.19181 2.5783 3.16012 3.60999C2.12843 4.64169 1.54883 6.04096 1.54883 7.49999C1.54883 8.95903 2.12843 10.3583 3.16012 11.39L4.22012 12.45L12.0001 20.23L19.7801 12.45L20.8401 11.39C21.3511 10.8792 21.7565 10.2728 22.033 9.60535C22.3096 8.93789 22.4519 8.22248 22.4519 7.49999C22.4519 6.77751 22.3096 6.0621 22.033 5.39464C21.7565 4.72718 21.3511 4.12075 20.8401 3.60999V3.60999Z" fill="#C5E4F9" stroke="#1390E5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <i class="search__field-icon icon-heart" @click="addToFavorites('save')" v-else-if="requestText"/>
       <v-button class="search__field-button" button-type="filled" @click.native="runSearch()">Найти</v-button>
     </div>
     <div class="search__panel" v-if="response.length > 0">
@@ -37,6 +40,8 @@
 <script>
 import vSearchResults from '@/src/components/vSearchResults'
 import vButton from '@/src/components/globalComponents/vButton'
+
+import {mapState} from 'vuex'
 
 const API_KEY = 'AIzaSyDxJr90cU0JIKr-lOziW0hfV8NGWaV9dwc'
 // const API_KEY = 'AIzaSyACDbnvwjKF0A-xWxDHKShZeUjgDxAM_rg'
@@ -70,21 +75,24 @@ export default {
     }
   },
   computed: {
+    ...mapState({
+      favorites: state => state.favorites
+    }),
     modalData() {
       return {
-        type: 'save',
-        request: {
-          name: '',
-          text: this.textModel,
-          maxResults: 12,
-          order: '',
-        },
+        name: '',
+        text: this.textModel,
+        maxResults: 12,
+        order: '',
       }
     },
+    repeatedQuery() {
+      return !!this.favorites.find(item => item.text === this.requestText)
+    }
   },
   mounted() {
-    if (typeof this.$route.query.req === 'string') {
-      this.requestText = this.$route.query.req
+    if (typeof this.$route.query.q === 'string') {
+      this.requestText = this.$route.query.q
       this.runSearch(true)
     }
   },
@@ -93,19 +101,20 @@ export default {
       this.currentView = !this.currentView
     },
     runSearch(queryFromUrl = false) {
-      if (queryFromUrl) {
-        this.textModel = this.requestText
-      } else {
-        this.requestText = this.textModel
-      }
-      if (this.$route.query.req !== this.textModel) {
-        this.$router.push({ query: { req: this.textModel } })
-      }
+      if (queryFromUrl) this.textModel = this.requestText
+      else this.requestText = this.textModel
+      if (this.$route.query.q !== this.textModel) this.$router.push({ query: { q: this.textModel } })
+      
       if (this.requestText !== '') {
         this.request.searchParams.q = this.requestText
         this.response = []
         this.ids = []
-        this.axios.get(this.request.searchUrl, { params: this.request.searchParams })
+        Object.keys(this.$route.query).forEach(i => {
+          if (this.$route.query[i] !== undefined) {
+            this.request.searchParams[i] = this.$route.query[i]
+          }
+        })
+        this.axios.get(this.request.searchUrl, { params: this.request.searchParams})
           .then((response) => {
             this.totalResults = response.data.pageInfo.totalResults
             response.data.items.forEach(item => {
@@ -127,9 +136,9 @@ export default {
           response.data.items.forEach((item, index) => this.$set(this.response[index], 'statistics', item.statistics))
         })
     },
-    addToFavorites() {
+    addToFavorites(type) {
       if (this.textModel !== '') {
-        this.$eventBus.$emit('showModal', this.modalData)
+        this.$eventBus.$emit('showModal', {request: this.modalData, type})
       }
     },
   },

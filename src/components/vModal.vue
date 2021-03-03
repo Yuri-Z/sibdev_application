@@ -1,7 +1,7 @@
 <template>
   <div class="modal" v-if="modalType !== ''">
     <div class="modal__content">
-      <h3 class="modal__title">{{ `${modalAppearance[modalType]}нить запрос` }}</h3>
+      <h3 class="modal__title">{{ modalAppearance[modalType].title }}</h3>
       <div class="modal__inputs">
         <div class="modal__row modal__row_text">
           <label class="modal__label label">Запрос</label>
@@ -25,11 +25,11 @@
         </div>
       </div>
       <div class="modal__buttons">
-        <v-button class="modal__button" button-type="hollow" @click.native="closeModal">{{ `не ${modalAppearance[modalType]}нять` }}</v-button>
-        <v-button class="modal__button" button-type="filled" @click.native="saveRequest">{{ `${modalAppearance[modalType]}нить` }}</v-button>
+        <v-button class="modal__button" button-type="hollow" @click.native="closeModal">{{ modalAppearance[modalType].cancel }}</v-button>
+        <v-button class="modal__button" button-type="filled" @click.native="saveRequest">{{ modalAppearance[modalType].confirm }}</v-button>
       </div>
     </div>
-    <div class="modal__shadow"></div>
+    <div class="modal__shadow"/>
   </div>
 </template>
 
@@ -37,6 +37,8 @@
 import vButton from '@/src/components/globalComponents/vButton'
 import vRange from '@/src/components/globalComponents/vRange'
 import vSelect from '@/src/components/globalComponents/vSelect'
+
+import {mapState, mapActions} from 'vuex'
 
 export default {
   name: 'vModal',
@@ -47,8 +49,23 @@ export default {
       modalType: '',
       placeholder: 'Без сортировки',
       modalAppearance: {
-        save: 'сохра',
-        edit: 'изме'
+        save: {
+          title: 'сохранить запрос',
+          confirm: 'сохранить',
+          cancel: 'не сохранять'
+        },
+        edit: {
+          title: 'Изменить запрос',
+          confirm: 'изменить',
+          cancel: 'не изменять'
+        },
+      },
+      orderTemplate: {
+        date: 'Дата',
+        rating: 'Рейтинг',
+        relevance: 'Релевантность',
+        title: 'Название',
+        viewCount: 'Количество просмотров'
       },
       oldName: '',
       request: {
@@ -61,11 +78,12 @@ export default {
     }
   },
   computed: {
-    favorites() {
-      return this.$store.state.favorites
-    }
+    ...mapState({
+      favorites: state => state.favorites
+    })
   },
   methods: {
+    ...mapActions(['setFavorites']),
     closeModal() {
       this.modalType = ''
     },
@@ -74,12 +92,16 @@ export default {
     },
     saveRequest() {
       if (this.request.name !== '') {
-        if (this.modalType === 'edit' && this.request.name !== this.oldName) {
-          if (this.favorites.find(fav => fav.name === this.request.name)) {
-            return this.error = 'Это имя уже занято'
-          }
+        if (
+          // Если есть повтор имени и это не редактирование
+          // или
+          // если есть повтор и при редактировании новое имя отличается от старого (т.е. мы пытаемся занять чужое существующее)
+          this.favorites.find(fav => fav.name === this.request.name) &&
+          (!this.oldName || (this.oldName && this.oldName !== this.request.name))
+        ) {
+          return this.error = 'Это имя уже занято'
         }
-        this.$store.commit('addToFavorites', { request: this.request, index: this.index })
+        this.setFavorites([this.request, this.index])
         this.closeModal()
       } else {
         this.error = 'Это поле обязательно для заполнения'
@@ -103,7 +125,7 @@ export default {
       if (this.error.length > 0) {
         this.error = ''
       }
-    }
+    },
   }
 }
 </script>
